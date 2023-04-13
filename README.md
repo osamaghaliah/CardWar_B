@@ -1,31 +1,11 @@
-<div dir="rtl" lang="he">
+<h1 align="center">War</h1>
+<h2 align="center">:spades: :hearts: :black_joker: :diamonds: :clubs:</h2>
 
-# מלחמה
-במטלה זו נממש את משחק הקלפים מלחמה עבור שני שחקנים. 
-יש חפיסת קלפים רגיל עם 52 קלפים בתחילת המשחק החפיסה מעורבבת (בצורה ראנדומאלית) ומחולקת שווה בשווה בין שני השחקנים.
-בכל תור השחקנים שולפים קלף אחד מראש הערימה שלהם השחקן עם הקלף הגבוהה ביותר לוקח את שני הקלפים אליו (2 מנצח אס).
-אם השחקנים שלפו שני קלפים זהים אז הם מניחים קלף אחד הפוך ומעליו קלף פחות. השחק עם הקלף הגבוהה לוקח את כל ששת הקלפים. במידה ושוב יש תיקו ממשיכים עם קלף סגור ואחריו קלף פתוח עד שאחד השחקנים מנצח. התור נמשך עד שאחד השחקנים לוקח את הקופה או שנגמרים הקלפים. 
-אם נגמרים הקלפים תוך כדי השובר שיוויון כל שחקן לוקח את הקלפים שהוא זרק (מתחלקים בקופה חצי חצי).
-המשחק נמשך עד שנגמרים לשחקנים הקלפים והמנצח הוא השחקן שלקח לעצמו את מירב הקלפים. 
+**Introduction -** _War is a cards game that is played between two players such that a stack of 52 cards is divided equally between them._
 
-דוגמאות לפעולת המחלקה ניתן למצוא ב-[Demo.cpp](Demo.cpp).
+**How To Play -** _After dividing the stack on the two players, a one single round is played as follows - each player sets his stack (which consists of 26 cards) to be faced down. Then, each player pulls one card of his stack and reveals it, the owner of the card with the higher rank wins both cards and puts them aside. The game ends once one of the players stack is empty (0 cards left), at this point, the player who won a bigger number of cards is the winner._
 
-בשלב ב עליכם לכתוב את המימוש המלא. מותר לערוך את המימוש של שלב א אבל אם עשיתם עבודה טובה לא יהיה בכך צורך.
-יעלו טסטים נבחרים של סטודנטים. עליכם לעבור את כל הטסטים בציון 100. המטלה תיבדר ע"י הרצת
+> **NOTICE:** _A card of rank 2 defeats a card of rank Ace._
 
-כיתבו את כל הקבצים הדרושים כך שהפקודות הבאות יעבדו ללא שגיאות:
-
-<div dir='ltr'>
-
-    bash grade
-
-</div>
-
-
-שימו לב:
-אין לשנות קבצים קיימים, אלא רק להוסיף קבצים חדשים.
-מערכת הבדיקה האוטומטית מעתיקה מחדש את כל הקבצים הקיימים על-גבי הפתרון שאתם מגישים,
-ולכן כל שינוי שתעשו בקבצים הקיימים יימחק.
-
-בהצלחה
-</div>
+**Draw Occurence -** _In case that the two players pulled cards of the same rank, it is considered a draw for the current round. What do we do ?_
+_Each player pulls a new card from his stack without revealing it (facing down) and sets it on the former card (that caused a draw) and pulls another card by revealing it (facing up). Here, the players simply get back to comparing their cards by the rank - if another draw has occured, the same steps as before must be performed on the stack that started to be accumulated, if NO draw occured, the winner of the current round wins the whole cards that were being bet on._ 
