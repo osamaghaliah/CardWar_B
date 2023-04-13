@@ -19,6 +19,10 @@ Player::Player(Player &player) {
     this->cards_stack = player.cards_stack;
 }
 
+Player::~Player() {
+    
+}
+
 int Player::stacksize() {
     return this->current_stack_size;
 }
@@ -51,10 +55,10 @@ void Player::set_current_card(Card new_card) {
     this->current_card = new_card;
 }
 
-vector <Card> Player::get_cards_stack() {
+array <Card, player_deck_size> Player::get_cards_stack() {
     return this->cards_stack;
 }
 
-void Player::set_cards_stack(vector <Card> cards_stack) {
+void Player::set_cards_stack(array <Card, player_deck_size> cards_stack) {
     this->cards_stack = cards_stack;
 }

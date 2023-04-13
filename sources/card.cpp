@@ -1,4 +1,5 @@
 #include "card.hpp"
+#include "game.hpp"
 using namespace std;
 
 Card::Card() {
@@ -17,6 +18,10 @@ Card::Card(string rank, string symbol) {
     this->rank = rank;
     this->symbol = symbol;
     this->revealed = false;
+}
+
+Card::~Card() {
+
 }
 
 string Card::getRank() {

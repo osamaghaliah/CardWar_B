@@ -8,6 +8,8 @@
 #define card_hpp
 
 #include <iostream>
+#include <string>
+
 using namespace std;
 
 class Card {
@@ -23,6 +25,7 @@ class Card {
         Card();
         // Copy constructor.
         Card(Card &card);
+        ~Card();
         // Getters for this card's attributes.
         string getRank();
         string getSymbol();

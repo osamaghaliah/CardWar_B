@@ -8,9 +8,11 @@
 #define player_hpp
 
 #include <iostream>
-#include <vector>
+#include <array>
 #include "card.hpp"
 using namespace std;
+
+const int player_deck_size = 26;
 
 class Player {
     private:
@@ -18,7 +20,7 @@ class Player {
         int current_stack_size;
         int cards_won;
         Card current_card;
-        vector <Card> cards_stack;
+        array <Card, player_deck_size> cards_stack;
 
     public:
         // No-default contructor.
@@ -27,6 +29,7 @@ class Player {
         Player();
         // Copy constructor.
         Player(Player &player);
+        ~Player();
         // This method returns how many cards this player has won so far.
         int cardesTaken();
         // This method is a setter for the cards that this player has won.
@@ -44,9 +47,9 @@ class Player {
         // This is a setter for this player's current card that was pulled out from his stack.
         void set_current_card(Card new_card);
         // This is a getter for this player's cards stack.
-        vector <Card> get_cards_stack();
+        array <Card, player_deck_size> get_cards_stack();
         // This is a setter for this player's cards stack.
-        void set_cards_stack(vector <Card> cards_stack);
+        void set_cards_stack(array <Card, player_deck_size> cards_stack);
         // This is a getter for this player's cards stack.
 };
 
