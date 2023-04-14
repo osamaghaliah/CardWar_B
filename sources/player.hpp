@@ -17,6 +17,7 @@ class Player {
         vector <Card> playerDeck;
         vector <Card> playerWinningDeck;
         int roundsWon;
+        //int roundsDrawn;
         int cardsWon;
         
     public:
@@ -25,8 +26,10 @@ class Player {
         vector <Card> getPlayerDeck();  
         vector <Card> getPlayerWinningDeck();
         int getRoundsWon();
-        void setRoundsWon(int roundsWon);
+        //int getRoundsDrawn();
         string getName();
+        void setRoundsWon(int roundsWon);
+        //void setRoundsDrawn();
         int stacksize();
         int cardesTaken();
         // For reading convenience.

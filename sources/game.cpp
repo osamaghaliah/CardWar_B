@@ -13,6 +13,7 @@ Game::Game(Player& firstPlayer, Player& secondPlayer): firstPlayer(firstPlayer),
     this->allRoundsIncidents = "";
     this->gameWinner = "";
     this->rounds = 0;
+    this->drawsOccured = 0;
     
     // Setting up a full deck consisting of 52 cards.
     this->gameDeck = ariel::DECK;
@@ -116,8 +117,8 @@ void Game::playAll() {
 }
 
 void Game::printWiner() {
-    if (!this->isDone) {
-        cout << "The game has NOT finished yet.";
+    if (!(this->isDone)) {
+        cout << "The game has NOT finished yet. \n";
     }
     else if (this->firstPlayer.cardesTaken() == this->secondPlayer.cardesTaken()) {
         cout << "DRAW! There is NO winner." << endl;
@@ -138,31 +139,37 @@ void Game::printLog() {
 
 void Game::printStats() {
     cout << " ------------------------------" << endl;
-    cout << "|       Game's Statistics      |" << endl;
+    cout << "|      Game's Statistics       |" << endl;
     cout << " ------------------------------";
     cout << "\n";
 
-    cout << "| First Opponent's Peformance  |" << endl;
+    cout << "|      " + this->firstPlayer.getName() + "'s Peformance      |" << endl;
     cout << "| ---------------------------  |" << endl;
-    cout << "|        Name: " + this->firstPlayer.getName() + "           |" << endl;
-    cout << "|        Cards won: " + to_string(this->firstPlayer.cardesTaken()) + "         |" << endl;
-    double FP_WinRatio = 100.0 * firstPlayer.getRoundsWon() / rounds;
-    cout << "|        Win rate: " << FP_WinRatio << "%" << "    |" << endl;
+    double FP_DrawRatio = this->drawsOccured / this->rounds;
+    cout << "|        Draw rate: " + to_string(FP_DrawRatio) << "%" << "  |" << endl;
+    double FP_WinRatio = 100.0 * this->firstPlayer.getRoundsWon() / this->rounds;
+    cout << "|        Win rate: " << FP_WinRatio << "%" << "         |" << endl;
+    cout << "|        Rounds played: " << this->rounds << "      |" << endl;
+    cout << "|        Rounds won: " << this->firstPlayer.getRoundsWon() << "         |" << endl;
 
     cout << "|                              |" << endl;
     cout << "|                              |" << endl;
 
-    cout << "| Second Opponent's Peformance |" << endl;
+    cout << "|      " + this->secondPlayer.getName() + "'s Peformance        |" << endl;
     cout << "| ---------------------------  |" << endl;
-    cout << "|        Name: " + this->secondPlayer.getName() + "             |" << endl;
-    cout << "|        Cards won: " + to_string (this->secondPlayer.cardesTaken()) + "         |" << endl;
-    double SP_WinRatio = 100.0 * secondPlayer.getRoundsWon() / rounds;
+    double SP_DrawRatio = this->drawsOccured / this->rounds;
+    cout << "|        Draw rate: " + to_string(SP_DrawRatio) << "%" << "  |" << endl;
+    double SP_WinRatio = 100.0 * this->secondPlayer.getRoundsWon() / this->rounds;
     cout << "|        Win rate: " << SP_WinRatio << "%" << "         |" << endl;
+    cout << "|        Rounds played: " << this->rounds << "      |" << endl;
+    cout << "|        Rounds won: " << this->secondPlayer.getRoundsWon() << "         |" << endl;
+
     cout << "| ____________________________ |" << endl;
     cout << "\n";
 }
 
 void Game::GoToWarZone(Card FP_Card, Card SP_Card) {
+    this->drawsOccured++;
     Card FP_FacedDownCard = this->firstPlayer.pullFromTopOfDeck();
     Card SP_FacedDownCard = this->secondPlayer.pullFromTopOfDeck();
     Card FP_FacedUpCard = this->firstPlayer.pullFromTopOfDeck();

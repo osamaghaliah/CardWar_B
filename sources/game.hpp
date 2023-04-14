@@ -23,6 +23,8 @@ class Game {
         vector <Card> gameDeck;
         vector <Card> gameWinningDeck;
         bool isDone;
+        int drawsOccured;
+
 
     public:
         // Constructor.
