@@ -1,64 +1,60 @@
 #include "player.hpp"
 
-Player::Player() {
-    this->name = "";
-    this->current_stack_size = 0;
-    this->cards_won = 0;
+using namespace std;
+
+Player::Player(string name): playerDeck{}, playerWinningDeck{} {
+    this->name = name; 
+    this->cardsWon = 0;
+    this->roundsWon = 0;
 }
 
-Player::Player(string name) {
-    this->name = name;
-    this->current_stack_size = 0;
-    this->cards_won = 0;
+vector <Card> Player::getPlayerDeck() {
+    return this->playerDeck;
 }
 
-Player::Player(Player &player) {
-    this->name = player.name;
-    this->current_stack_size = player.stacksize();
-    this->cards_won = player.cards_won;
-    this->cards_stack = player.cards_stack;
+vector <Card> Player::getPlayerWinningDeck() {
+    return this->playerWinningDeck;
 }
 
-Player::~Player() {
-    
+int Player::getRoundsWon() {
+    return this->roundsWon;
 }
 
-int Player::stacksize() {
-    return this->current_stack_size;
-}
-
-void Player::set_current_stack_size(int size) {
-    this->current_stack_size = size;
-}
-
-int Player::cardesTaken() {
-    return this->cards_won;
-}
-
-void Player::set_cards_won(int cards_won) {
-    this->cards_won = cards_won;
+void Player::setRoundsWon(int roundsWon) {
+    this->roundsWon = roundsWon;
 }
 
 string Player::getName() {
     return this->name;
 }
 
-void Player::setName(string name) {
-    this->name = name;
+int Player::stacksize() {
+    return this->playerDeck.size();
 }
 
-Card Player::get_current_card() {
-    return this->current_card;
+int Player::cardesTaken() {
+    return this->playerWinningDeck.size();
 }
 
-void Player::set_current_card(Card new_card) {
-    this->current_card = new_card;
+void Player::putOnPlayerDeck(Card card) {
+    this->playerDeck.push_back(card);
 }
 
-array <Card, player_deck_size> Player::get_cards_stack() {
-    return this->cards_stack;
+void Player::putOnPlayerWinningDeck(Card card) {
+    this->playerWinningDeck.push_back(card);
 }
 
-void Player::set_cards_stack(array <Card, player_deck_size> cards_stack) {
-    this->cards_stack = cards_stack;
+Card Player::pullFromTopOfDeck() {
+    if (this->stacksize() == 0) {
+        throw logic_error(this->name + " has ran out of cards.");
+    }
+
+    else {
+        Card top = this->playerDeck[0];
+        this->playerDeck.erase(this->playerDeck.begin());
+        
+        return top;
+    }
 }
+
+

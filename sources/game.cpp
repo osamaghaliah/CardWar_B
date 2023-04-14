@@ -1,380 +1,218 @@
+#include <random>
+#include <algorithm>
+#include "player.hpp"
+#include "card.hpp"
 #include "game.hpp"
+#include "namespace.hpp"
+
 using namespace std;
 
-Game::Game(Player &first_player, Player &second_player): first_player(first_player), second_player(second_player), current_winner(), deck() {
-    this->first_player.set_current_stack_size(26);
-    this->second_player.set_current_stack_size(26);
-    this->current_round = 0;
-    this->index = 0;
-    this->isDone = true;
+Game::Game(Player& firstPlayer, Player& secondPlayer): firstPlayer(firstPlayer), secondPlayer(secondPlayer) {
+    this->isDone = false;
+    this->oneRoundIncident = "";
+    this->allRoundsIncidents = "";
+    this->gameWinner = "";
+    this->rounds = 0;
+    
+    // Setting up a full deck consisting of 52 cards.
+    this->gameDeck = ariel::DECK;
 
-    this->deck.shuffle();
+    // Shuffling the deck.
+    shuffle(this->gameDeck.begin(), this->gameDeck.end(), default_random_engine());
+    
+    // Distributing the deck between the two opponents.
+    size_t index = 0;
 
-    for (size_t i = 0; i < 52; i++) {
-        if (i < 26) {
-            this->first_player.get_cards_stack()[i] = this->deck.getDeck()[i];
-        }
+    while (index < 26) {
+        this->firstPlayer.putOnPlayerDeck(this->gameDeck[index]);
+        index++;
+    }
 
-        else {
-            this->second_player.get_cards_stack()[i] = this->deck.getDeck()[i];
-        }
+    while (index >= 26 && index < 52) {
+        this->secondPlayer.putOnPlayerDeck(this->gameDeck[index]);
+        index++;
     }
 }
 
-Game::~Game() {
-    
+Player Game::getFirstPlayer() {
+    return this->firstPlayer;
 }
 
-Player Game::get_first_player() {
-    return this->first_player;
+Player Game::getSecondPlayer() {
+    return this->secondPlayer;
 }
 
-Player Game::get_second_player() {
-    return this->second_player;
+string Game::getGameWinner() {
+    return this->gameWinner;
 }
 
-Player Game::get_current_winner() {
-    return this->current_winner;
+vector <Card> Game::getGameDeck() {
+    return this->gameDeck;
 }
 
-int Game::get_current_round() {
-    return this->current_round;
-}
-
-size_t Game::getIndex() {
-    return this->index;
-}
-
-bool Game::get_isDone() {
-    return this->isDone;
-}
-
-void Game::set_first_player(Player &new_player) {
-    this->first_player = new_player;
-}
-
-void Game::set_second_player(Player &new_player) {
-    this->second_player = new_player;
-}
-
-void Game::set_current_winner(Player &current_winner) {
-    this->current_winner = current_winner;
-}
-
-void Game::set_current_round(int new_round) {
-    this->current_round = new_round;
-}
-
-void Game::setIndex(size_t index) {
-    this->index = index;
-}
-
-void Game::set_isDone(bool isDone) {
-    this->isDone = isDone;
-}
-
-map <int, string> Game::get_rounds_details() {
-    return this->rounds_details;
+vector <Card> Game::getGameWinningDeck() {
+    return this->gameWinningDeck;
 }
 
 void Game::playTurn() {
-    this->first_player.set_current_stack_size(this->first_player.stacksize() - 1);
-    this->first_player.set_current_card(this->first_player.get_cards_stack()[this->index]);
-
-    this->second_player.set_current_stack_size(this->second_player.stacksize() - 1);
-    this->second_player.set_current_card(this->second_player.get_cards_stack()[this->index]);
-
-    this->index++;
-
-    int cardsToBeTaken = 0;
-    string incident;
-
-    if (this->first_player.get_current_card().getRank() == this->second_player.get_current_card().getRank()) {
-        while (this->first_player.get_current_card().getRank() == this->second_player.get_current_card().getRank()) {
-            incident = this->first_player.getName() + " pulled " + this->first_player.get_current_card().description()
-                        + " and " + this->second_player.getName() + " pulled " + this->second_player.get_current_card().description() + ". DRAW!";
-            
-            // The two players pulling a card from their stacks and facing it down.
-            this->first_player.set_current_stack_size(this->first_player.stacksize() - 1);
-            this->first_player.set_current_card(this->first_player.get_cards_stack()[this->index]);
-            this->first_player.get_current_card().setRevealed(false);
-            this->second_player.set_current_stack_size(this->second_player.stacksize() - 1);
-            this->second_player.set_current_card(this->second_player.get_cards_stack()[this->index]);
-            this->second_player.get_current_card().setRevealed(false);
-            this->index++;
-
-            // Then, both of them pull another one by facing it up for comparison.
-            this->first_player.set_current_stack_size(this->first_player.stacksize() - 1);
-            this->first_player.set_current_card(this->first_player.get_cards_stack()[this->index]);
-            this->first_player.get_current_card().setRevealed(true);
-            this->second_player.set_current_stack_size(this->second_player.stacksize() - 1);
-            this->second_player.set_current_card(this->second_player.get_cards_stack()[this->index]);
-            this->second_player.get_current_card().setRevealed(true);
-            this->index++;
-
-            cardsToBeTaken += 2;
-
-            // Handling rank results contradictions based on ASCI table and the game's rules.
-            if (this->first_player.get_current_card().getRank() > this->second_player.get_current_card().getRank()) {
-                if (this->first_player.get_current_card().getRank() == "Ace" && this->second_player.get_current_card().getRank() == "Two") {
-                    this->second_player.set_cards_won(this->second_player.cardesTaken() + cardsToBeTaken);
-                    this->set_current_winner(this->second_player);
-                    
-                    incident += this->first_player.getName() + " pulled " + this->first_player.get_current_card().description()
-                        + " and " + this->second_player.getName() + " pulled " + this->second_player.get_current_card().description() + ". DRAW!";
-
-                    break;
-                }
-                
-                else if (this->first_player.get_current_card().getRank() == "Queen" && this->second_player.get_current_card().getRank() == "King") {
-                    this->second_player.set_cards_won(this->second_player.cardesTaken() + cardsToBeTaken);
-                    this->set_current_winner(this->second_player);
-                    
-                    incident += this->first_player.getName() + " pulled " + this->first_player.get_current_card().description()
-                        + " and " + this->second_player.getName() + " pulled " + this->second_player.get_current_card().description() + ". DRAW!";
-
-                    break;
-                }
-
-                else if (this->first_player.get_current_card().getRank() == "Queen" && this->second_player.get_current_card().getRank() == "Ace") {
-                    this->second_player.set_cards_won(this->second_player.cardesTaken() + cardsToBeTaken);
-                    this->set_current_winner(this->second_player);
-
-                    incident += this->first_player.getName() + " pulled " + this->first_player.get_current_card().description()
-                        + " and " + this->second_player.getName() + " pulled " + this->second_player.get_current_card().description() + ". DRAW!";
-
-                    break;
-                }
-
-                else if (this->first_player.get_current_card().getRank() == "Jack" && this->second_player.get_current_card().getRank() == "Ace") {
-                    this->second_player.set_cards_won(this->second_player.cardesTaken() + cardsToBeTaken);
-                    this->set_current_winner(this->second_player);
-
-                    incident += this->first_player.getName() + " pulled " + this->first_player.get_current_card().description()
-                        + " and " + this->second_player.getName() + " pulled " + this->second_player.get_current_card().description() + ". DRAW!";
-
-                    break;
-                }
-
-                else if (this->first_player.get_current_card().getRank() == "King" && this->second_player.get_current_card().getRank() == "Ace") {
-                    this->second_player.set_cards_won(this->second_player.cardesTaken() + cardsToBeTaken);
-                    this->set_current_winner(this->second_player);
-
-                    incident += this->first_player.getName() + " pulled " + this->first_player.get_current_card().description()
-                        + " and " + this->second_player.getName() + " pulled " + this->second_player.get_current_card().description() + ". DRAW!";
-
-                    break;
-                }
-
-                else {
-                    this->first_player.set_cards_won(this->first_player.cardesTaken() + cardsToBeTaken);
-                    this->set_current_winner(this->first_player);
-
-                    incident += this->first_player.getName() + " pulled " + this->first_player.get_current_card().description()
-                        + " and " + this->second_player.getName() + " pulled " + this->second_player.get_current_card().description() + ". DRAW!";
-
-                    break;
-                }
-            }
-
-            else if (this->first_player.get_current_card().getRank() < this->second_player.get_current_card().getRank()) {
-                if (this->first_player.get_current_card().getRank() == "Ace" && this->second_player.get_current_card().getRank() == "Jack") {
-                    this->first_player.set_cards_won(this->first_player.cardesTaken() + cardsToBeTaken);
-                    this->set_current_winner(this->first_player);
-
-                    incident += this->first_player.getName() + " pulled " + this->first_player.get_current_card().description()
-                        + " and " + this->second_player.getName() + " pulled " + this->second_player.get_current_card().description() + ". DRAW!";
-
-                    break;
-                }
-
-                else if (this->first_player.get_current_card().getRank() == "Ace" && this->second_player.get_current_card().getRank() == "Queen") {
-                    this->first_player.set_cards_won(this->first_player.cardesTaken() + cardsToBeTaken);
-                    this->set_current_winner(this->first_player);
-
-                    incident += this->first_player.getName() + " pulled " + this->first_player.get_current_card().description()
-                        + " and " + this->second_player.getName() + " pulled " + this->second_player.get_current_card().description() + ". DRAW!";
-
-                    break;
-                }
-
-                else if (this->first_player.get_current_card().getRank() == "Ace" && this->second_player.get_current_card().getRank() == "King") {
-                    this->first_player.set_cards_won(this->first_player.cardesTaken() + cardsToBeTaken);
-                    this->set_current_winner(this->first_player);
-
-                    incident += this->first_player.getName() + " pulled " + this->first_player.get_current_card().description()
-                        + " and " + this->second_player.getName() + " pulled " + this->second_player.get_current_card().description() + ". DRAW!";
-
-                    break;
-                }
-
-                else if (this->first_player.get_current_card().getRank() == "Ace" && this->second_player.get_current_card().getRank() == "Two") {
-                    this->second_player.set_cards_won(this->second_player.cardesTaken() + cardsToBeTaken);
-                    this->set_current_winner(this->second_player);
-
-                    incident += this->first_player.getName() + " pulled " + this->first_player.get_current_card().description()
-                        + " and " + this->second_player.getName() + " pulled " + this->second_player.get_current_card().description() + ". DRAW!";
-
-                    break;
-                }
-
-                else if (this->first_player.get_current_card().getRank() == "King" && this->second_player.get_current_card().getRank() == "Queen") {
-                    this->first_player.set_cards_won(this->first_player.cardesTaken() + cardsToBeTaken);
-                    this->set_current_winner(this->first_player);
-
-                    incident += this->first_player.getName() + " pulled " + this->first_player.get_current_card().description()
-                        + " and " + this->second_player.getName() + " pulled " + this->second_player.get_current_card().description() + ". DRAW!";
-
-                    break;
-                }
-
-                else {
-                    this->second_player.set_cards_won(this->second_player.cardesTaken() + cardsToBeTaken);
-                    this->set_current_winner(this->second_player);
-
-                    incident += this->first_player.getName() + " pulled " + this->first_player.get_current_card().description()
-                        + " and " + this->second_player.getName() + " pulled " + this->second_player.get_current_card().description() + ". DRAW!";
-
-                    break;
-                }
-            }
-        }
+    if(this->isDone) {
+        throw logic_error("The game has finished.");
     }
-
-    else if (this->first_player.get_current_card().getRank() > this->second_player.get_current_card().getRank()) {
-        if (this->first_player.get_current_card().getRank() == "Ace" && this->second_player.get_current_card().getRank() == "Two") {
-            this->second_player.set_cards_won(this->second_player.cardesTaken() + 1);
-            this->set_current_winner(this->second_player);
-            
-            incident += this->first_player.getName() + " pulled " + this->first_player.get_current_card().description()
-                + " and " + this->second_player.getName() + " pulled " + this->second_player.get_current_card().description() + ". DRAW!";
-        }
-        
-        else if (this->first_player.get_current_card().getRank() == "Queen" && this->second_player.get_current_card().getRank() == "King") {
-            this->second_player.set_cards_won(this->second_player.cardesTaken() + 1);
-            this->set_current_winner(this->second_player);
-            
-            incident += this->first_player.getName() + " pulled " + this->first_player.get_current_card().description()
-                + " and " + this->second_player.getName() + " pulled " + this->second_player.get_current_card().description() + ". DRAW!";
-        }
-
-        else if (this->first_player.get_current_card().getRank() == "Queen" && this->second_player.get_current_card().getRank() == "Ace") {
-            this->second_player.set_cards_won(this->second_player.cardesTaken() + 1);
-            this->set_current_winner(this->second_player);
-
-            incident += this->first_player.getName() + " pulled " + this->first_player.get_current_card().description()
-                + " and " + this->second_player.getName() + " pulled " + this->second_player.get_current_card().description() + ". DRAW!";
-        }
-
-        else if (this->first_player.get_current_card().getRank() == "Jack" && this->second_player.get_current_card().getRank() == "Ace") {
-            this->second_player.set_cards_won(this->second_player.cardesTaken() + 1);
-            this->set_current_winner(this->second_player);
-
-            incident += this->first_player.getName() + " pulled " + this->first_player.get_current_card().description()
-                + " and " + this->second_player.getName() + " pulled " + this->second_player.get_current_card().description() + ". DRAW!";
-        }
-
-        else if (this->first_player.get_current_card().getRank() == "King" && this->second_player.get_current_card().getRank() == "Ace") {
-            this->second_player.set_cards_won(this->second_player.cardesTaken() + 1);
-            this->set_current_winner(this->second_player);
-
-            incident += this->first_player.getName() + " pulled " + this->first_player.get_current_card().description()
-                + " and " + this->second_player.getName() + " pulled " + this->second_player.get_current_card().description() + ". DRAW!";
-        }
-
-        else {
-            this->first_player.set_cards_won(this->first_player.cardesTaken() + 1);
-            this->set_current_winner(this->first_player);
-
-            incident += this->first_player.getName() + " pulled " + this->first_player.get_current_card().description()
-                + " and " + this->second_player.getName() + " pulled " + this->second_player.get_current_card().description() + ". DRAW!";
-        }
+    else if (this->firstPlayer.getName() == this->secondPlayer.getName()) {
+        throw logic_error("A player CANNOT compete with himself.");
     }
-    
+    else if (this->firstPlayer.getPlayerDeck().size() == 0 || this->secondPlayer.getPlayerDeck().size() == 0) {
+        throw logic_error("One of the opponenets has NO cards left in his stack.");
+    }
     else {
-        if (this->first_player.get_current_card().getRank() == "Ace" && this->second_player.get_current_card().getRank() == "Jack") {
-            this->first_player.set_cards_won(this->first_player.cardesTaken() + 1);
-            this->set_current_winner(this->first_player);
+        Card FP_FacedUpCard = this->firstPlayer.pullFromTopOfDeck();
+        Card SP_FacedUpCard = this->secondPlayer.pullFromTopOfDeck();
+        
+        this->oneRoundIncident = this->firstPlayer.getName() + " pulled " + FP_FacedUpCard.details() + " --- " 
+                                    + this->secondPlayer.getName() + " pulled " + SP_FacedUpCard.details();
+        
+        int compResult = FP_FacedUpCard.comp(SP_FacedUpCard);
 
-            incident += this->first_player.getName() + " pulled " + this->first_player.get_current_card().description()
-                + " and " + this->second_player.getName() + " pulled " + this->second_player.get_current_card().description() + ". DRAW!";
+        if (compResult == 0) {
+            this->oneRoundIncident += " --- Draw.";
+            this->allRoundsIncidents += oneRoundIncident +"\n";
+            this->gameWinningDeck.push_back(FP_FacedUpCard);
+            this->gameWinningDeck.push_back(SP_FacedUpCard);
+
+            GoToWarZone(FP_FacedUpCard,SP_FacedUpCard);
         }
-
-        else if (this->first_player.get_current_card().getRank() == "Ace" && this->second_player.get_current_card().getRank() == "Queen") {
-            this->first_player.set_cards_won(this->first_player.cardesTaken() + 1);
-            this->set_current_winner(this->first_player);
-
-            incident += this->first_player.getName() + " pulled " + this->first_player.get_current_card().description()
-                + " and " + this->second_player.getName() + " pulled " + this->second_player.get_current_card().description() + ". DRAW!";
+        else if (compResult == 1) {
+            this->secondPlayer.putOnPlayerWinningDeck(SP_FacedUpCard);
+            this->secondPlayer.putOnPlayerWinningDeck(FP_FacedUpCard);
+            this->oneRoundIncident += " --- "+ this->secondPlayer.getName() + " wins.";
+            this->allRoundsIncidents += this->oneRoundIncident +"\n";
+            this->secondPlayer.setRoundsWon(this->secondPlayer.getRoundsWon() + 1);
         }
-
-        else if (this->first_player.get_current_card().getRank() == "Ace" && this->second_player.get_current_card().getRank() == "King") {
-            this->first_player.set_cards_won(this->first_player.cardesTaken() + 1);
-            this->set_current_winner(this->first_player);
-
-            incident += this->first_player.getName() + " pulled " + this->first_player.get_current_card().description()
-                + " and " + this->second_player.getName() + " pulled " + this->second_player.get_current_card().description() + ". DRAW!";
-        }
-
-        else if (this->first_player.get_current_card().getRank() == "Ace" && this->second_player.get_current_card().getRank() == "Two") {
-            this->second_player.set_cards_won(this->second_player.cardesTaken() + 1);
-            this->set_current_winner(this->second_player);
-
-            incident += this->first_player.getName() + " pulled " + this->first_player.get_current_card().description()
-                + " and " + this->second_player.getName() + " pulled " + this->second_player.get_current_card().description() + ". DRAW!";
-        }
-
-        else if (this->first_player.get_current_card().getRank() == "King" && this->second_player.get_current_card().getRank() == "Queen") {
-            this->first_player.set_cards_won(this->first_player.cardesTaken() + 1);
-            this->set_current_winner(this->first_player);
-
-            incident += this->first_player.getName() + " pulled " + this->first_player.get_current_card().description()
-                + " and " + this->second_player.getName() + " pulled " + this->second_player.get_current_card().description() + ". DRAW!";
-        }
-
         else {
-            this->second_player.set_cards_won(this->second_player.cardesTaken() + 1);
-            this->set_current_winner(this->second_player);
-
-            incident += this->first_player.getName() + " pulled " + this->first_player.get_current_card().description()
-                + " and " + this->second_player.getName() + " pulled " + this->second_player.get_current_card().description() + ". DRAW!";
+            this->firstPlayer.putOnPlayerWinningDeck(FP_FacedUpCard);
+            this->firstPlayer.putOnPlayerWinningDeck(SP_FacedUpCard);
+            this->oneRoundIncident += " --- "+ this->firstPlayer.getName() + " wins.";
+            this->allRoundsIncidents += oneRoundIncident +"\n";
+            this->firstPlayer.setRoundsWon(this->firstPlayer.getRoundsWon() + 1);
         }
+
+        // Moving on to the next round.
+        this->rounds++;
     }
-    
-    this->current_round++;
-    this->rounds_details[this->current_round] = incident;
 }
 
 void Game::printLastTurn() {
-    cout << this->rounds_details[rounds_details.size() - 1];
+    string lastTurnDetails = "Round " + to_string(this->rounds) + ": ";
+    lastTurnDetails += this->oneRoundIncident;
+
+    cout << lastTurnDetails << endl; 
 }
 
 void Game::playAll() {
-    while (this->first_player.stacksize() != 0 || this->second_player.stacksize() != 0) {
-        playTurn();
-    }
-
+    while (this->firstPlayer.stacksize() != 0 || this->secondPlayer.stacksize() != 0)
+        this->playTurn();
+    
     this->isDone = true;
 }
 
 void Game::printWiner() {
-    if (this->first_player.cardesTaken() > this->second_player.cardesTaken()) {
-        cout << "The winner is " << this->first_player.getName() << ".";
+    if (!this->isDone) {
+        cout << "The game has NOT finished yet.";
     }
-    else if (this->first_player.cardesTaken() < this->second_player.cardesTaken()) {
-        cout << "The winner is " << this->second_player.getName() << ".";
+    else if (this->firstPlayer.cardesTaken() == this->secondPlayer.cardesTaken()) {
+        cout << "DRAW! There is NO winner." << endl;
+    }
+    else if (this->firstPlayer.cardesTaken() > this->secondPlayer.cardesTaken()) {
+        this->gameWinner = "WINNER: " + this->firstPlayer.getName();
+        cout << this->gameWinner << endl;
     }
     else {
-        cout << "IT IS A DRAW!";
+        this->gameWinner = "WINNER: " + this->secondPlayer.getName();
+        cout << this->gameWinner << endl;
     }
 }
 
 void Game::printLog() {
-    for (auto pair : this->rounds_details) {
-        cout << pair.second << endl;
-    }
+    cout << this->allRoundsIncidents << endl; 
 }
 
 void Game::printStats() {
-    /* To be continued in part B... */
+    cout << " ------------------------------" << endl;
+    cout << "|       Game's Statistics      |" << endl;
+    cout << " ------------------------------";
+    cout << "\n";
+
+    cout << "| First Opponent's Peformance  |" << endl;
+    cout << "| ---------------------------  |" << endl;
+    cout << "|        Name: " + this->firstPlayer.getName() + "           |" << endl;
+    cout << "|        Cards won: " + to_string(this->firstPlayer.cardesTaken()) + "         |" << endl;
+    double FP_WinRatio = 100.0 * firstPlayer.getRoundsWon() / rounds;
+    cout << "|        Win rate: " << FP_WinRatio << "%" << "    |" << endl;
+
+    cout << "|                              |" << endl;
+    cout << "|                              |" << endl;
+
+    cout << "| Second Opponent's Peformance |" << endl;
+    cout << "| ---------------------------  |" << endl;
+    cout << "|        Name: " + this->secondPlayer.getName() + "             |" << endl;
+    cout << "|        Cards won: " + to_string (this->secondPlayer.cardesTaken()) + "         |" << endl;
+    double SP_WinRatio = 100.0 * secondPlayer.getRoundsWon() / rounds;
+    cout << "|        Win rate: " << SP_WinRatio << "%" << "         |" << endl;
+    cout << "| ____________________________ |" << endl;
+    cout << "\n";
+}
+
+void Game::GoToWarZone(Card FP_Card, Card SP_Card) {
+    Card FP_FacedDownCard = this->firstPlayer.pullFromTopOfDeck();
+    Card SP_FacedDownCard = this->secondPlayer.pullFromTopOfDeck();
+    Card FP_FacedUpCard = this->firstPlayer.pullFromTopOfDeck();
+    Card SP_FacedUpCard = this->secondPlayer.pullFromTopOfDeck();
+
+    this->oneRoundIncident = this->firstPlayer.getName() + " pulled " + FP_FacedUpCard.details() + " " 
+                                + this->secondPlayer.getName() + " pulled " + SP_FacedUpCard.details();
+    
+    this->gameWinningDeck.push_back(FP_FacedDownCard);
+    this->gameWinningDeck.push_back(SP_FacedDownCard);
+    this->gameWinningDeck.push_back(FP_FacedUpCard);
+    this->gameWinningDeck.push_back(SP_FacedUpCard);
+    
+    int compResult = FP_FacedUpCard.comp(SP_FacedUpCard);
+
+    if (compResult == 0) {
+        this->oneRoundIncident += ". Draw.";
+        this->allRoundsIncidents += oneRoundIncident +"\n";
+        GoToWarZone(FP_FacedUpCard, SP_FacedUpCard);
+    }
+    else if (compResult == 1) {
+        size_t index = 0;
+        
+        while (index < this->gameWinningDeck.size()) {
+            this->secondPlayer.putOnPlayerWinningDeck(this->gameWinningDeck[index]);
+            index++;
+        }
+
+        this->gameWinningDeck.clear();
+        
+        this->oneRoundIncident += ". "+ this->secondPlayer.getName() + " wins.";
+        this->allRoundsIncidents += oneRoundIncident +"\n";
+        
+    }   
+    else {
+        size_t index = 0;
+        
+        while (index < this->gameWinningDeck.size()) {
+            this->firstPlayer.putOnPlayerWinningDeck(this->gameWinningDeck[index]);
+            index++;
+        }
+
+        this->gameWinningDeck.clear();
+
+        this->oneRoundIncident += ". "+ this->firstPlayer.getName() + " wins.";
+        this->allRoundsIncidents += oneRoundIncident +"\n";
+    }
+
+    if (this->firstPlayer.stacksize() == 1 && this->secondPlayer.stacksize() == 1) {
+        this->firstPlayer.putOnPlayerWinningDeck(this->firstPlayer.getPlayerDeck().front());
+        this->secondPlayer.putOnPlayerWinningDeck(this->secondPlayer.getPlayerDeck().front());
+    }
 }

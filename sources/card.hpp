@@ -1,41 +1,33 @@
-/**
- * This class represents a single card that will be existed in a player's stack.
- * 
- * @author Osama M. Ghaliah
-*/
-
-#ifndef card_hpp
-#define card_hpp
+#ifndef CARD_HPP
+#define CARD_HPP
 
 #include <iostream>
-#include <string>
 
 using namespace std;
 
+enum Symbol {
+    Clubs , Diamonds, Hearts, Spades
+};
+
+enum Rank {
+    Two, Three, Four, Five, Six, Seven, Eight, Nine, Ten, Jack, Queen, King, Ace
+};
+
 class Card {
     private:
-        string rank;
-        string symbol;
-        bool revealed;
+        Symbol symbol;
+        Rank rank;  
 
     public:
-        // Non-default constructor.
-        Card(string rank, string symbol);
-        // Default constructor.
-        Card();
-        // Copy constructor.
-        Card(Card &card);
-        ~Card();
-        // Getters for this card's attributes.
-        string getRank();
-        string getSymbol();
-        bool getRevealed();
-        // Setters for this card's attributes.
-        void setRank(string new_rank);
-        void setSymbol(string new_symbol);
-        void setRevealed(bool revealed);
-        // This method represents a description for this card's rank and symbol.
-        string description();
+        // Constructor.
+        Card(Rank rank , Symbol symbol);
+        // Getters.
+        Symbol getSymbol();    
+        Rank getRank();
+        // Comparator for two cards ranks.
+        int comp(Card other);
+        // This method tells us what is the rank and the symbol of this card.
+        string details();
 };
 
 #endif
