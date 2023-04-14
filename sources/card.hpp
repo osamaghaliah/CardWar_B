@@ -1,3 +1,8 @@
+/**
+ * This class represents a single card which plays a role in the game's cards deck.
+ * @author Osama M. Ghaliah
+*/
+
 #ifndef CARD_HPP
 #define CARD_HPP
 

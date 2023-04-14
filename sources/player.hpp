@@ -1,3 +1,8 @@
+/**
+ * This class represents a player who is willing to be apart of a cards game.
+ * @author Osama M. Ghaliah
+*/
+
 #ifndef PLAYER_HPP
 #define PLAYER_HPP
 

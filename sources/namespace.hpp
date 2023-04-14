@@ -1,3 +1,8 @@
+/**
+ * This namespace represents a cards setup to be played with during the game.
+ * @author Osama M. Ghaliah
+*/
+
 #ifndef NAMESPACE_HPP
 #define NAMESPACE_HPP
 #include <vector>

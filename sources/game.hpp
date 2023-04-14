@@ -1,3 +1,8 @@
+/**
+ * This class represents a cards game which is called War.
+ * @author Osama M. Ghaliah
+*/
+
 #ifndef GAME_HPP
 #define GAME_HPP
 
